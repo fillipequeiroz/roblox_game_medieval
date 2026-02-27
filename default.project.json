@@ -25,7 +25,18 @@
         "SistemaConstrucao": {
           "$path": "Scripts/Sistema_Construcao.client.lua"
         }
+      },
+      "WorkbenchGUI": {
+        "$className": "ScreenGui",
+        "$ignoreUnknownInstances": true,
+        "WorkbenchCrafting": {
+          "$path": "Scripts/Workbench_Crafting.client.lua"
+        }
       }
+    },
+    "StarterPack": {
+      "$className": "StarterPack",
+      "$ignoreUnknownInstances": true
     },
     "ReplicatedStorage": {
       "$className": "ReplicatedStorage",
@@ -45,6 +56,9 @@
       },
       "ServerGerenciadorRecursos": {
         "$path": "Scripts/Server_GerenciadorRecursos.server.lua"
+      },
+      "ServerCrafting": {
+        "$path": "Scripts/Server_Crafting.server.lua"
       }
     }
   }

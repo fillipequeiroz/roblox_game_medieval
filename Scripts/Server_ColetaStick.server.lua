@@ -26,21 +26,28 @@ if not atualizarInventario then
 	atualizarInventario.Parent = eventos
 end
 
--- Dados dos jogadores
-local dadosJogadores = {}
+-- Dados dos jogadores (compartilhado entre todos os scripts)
+_G.DadosJogadores = _G.DadosJogadores or {}
+local dadosJogadores = _G.DadosJogadores
 
 -- Configuração de respawn
 local TEMPO_RESPAWN = 5 -- segundos
 
 -- Inicializar jogador
 local function inicializarJogador(player)
-	dadosJogadores[player.UserId] = {
-		inventario = {
-			paus = 0,
-			madeira = 0,
-			pedra = 0
+	-- Só inicializa se não existir (para não sobrescrever dados de outros sistemas)
+	if not dadosJogadores[player.UserId] then
+		dadosJogadores[player.UserId] = {
+			inventario = {
+				paus = 0,
+				madeira = 0,
+				pedra = 0
+			}
 		}
-	}
+	else
+		-- Garante que o campo 'paus' exista
+		dadosJogadores[player.UserId].inventario.paus = dadosJogadores[player.UserId].inventario.paus or 0
+	end
 end
 
 -- Função para respawnar item

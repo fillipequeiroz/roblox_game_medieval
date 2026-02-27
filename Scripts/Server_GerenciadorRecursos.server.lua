@@ -30,8 +30,9 @@ if not atualizarInventario then
 	atualizarInventario.Parent = eventos
 end
 
--- Dados dos jogadores (inventário)
-local dadosJogadores = {}
+-- Dados dos jogadores (compartilhado entre todos os scripts)
+_G.DadosJogadores = _G.DadosJogadores or {}
+local dadosJogadores = _G.DadosJogadores
 
 -- Configurações de recursos
 local CONFIG_RECURSOS = {
