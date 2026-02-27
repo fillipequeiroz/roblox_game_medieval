@@ -1,0 +1,20 @@
+# Arquivos do Roblox (muito grandes)
+*.rbxl
+*.rbxl.lock
+*.rbxm
+
+# Arquivos de extração temporária
+rbxl_extracted/
+
+# Rojo binário
+rojo.exe
+rojo-*-windows-x86_64/
+rojo-*.zip
+
+# Scripts de instalação temporários
+*.bat
+*.ps1
+
+# Outros
+*.md
+COPIAR_MANUALMENTE.txt

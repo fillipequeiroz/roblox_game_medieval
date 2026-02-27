@@ -1,0 +1,51 @@
+{
+  "name": "Medieval War",
+  "tree": {
+    "$className": "DataModel",
+    "StarterGui": {
+      "$className": "StarterGui",
+      "$ignoreUnknownInstances": true,
+      "InventarioGUI": {
+        "$className": "ScreenGui",
+        "$ignoreUnknownInstances": true,
+        "GUIInventario": {
+          "$path": "Scripts/GUI_Inventario.client.lua"
+        }
+      },
+      "ColetaGUI": {
+        "$className": "ScreenGui",
+        "$ignoreUnknownInstances": true,
+        "ColetaProximidade": {
+          "$path": "Scripts/Coleta_Proximidade.client.lua"
+        }
+      },
+      "ConstrucaoGUI": {
+        "$className": "ScreenGui",
+        "$ignoreUnknownInstances": true,
+        "SistemaConstrucao": {
+          "$path": "Scripts/Sistema_Construcao.client.lua"
+        }
+      }
+    },
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+      "$ignoreUnknownInstances": true,
+      "EventosJogo": {
+        "$className": "Folder"
+      }
+    },
+    "ServerScriptService": {
+      "$className": "ServerScriptService",
+      "$ignoreUnknownInstances": true,
+      "ServerColeta": {
+        "$path": "Scripts/Server_ColetaStick.server.lua"
+      },
+      "ServerConstrucao": {
+        "$path": "Scripts/Server_Construcao.server.lua"
+      },
+      "ServerGerenciadorRecursos": {
+        "$path": "Scripts/Server_GerenciadorRecursos.server.lua"
+      }
+    }
+  }
+}
