@@ -59,6 +59,30 @@ local podeGolpear = true
 local podeColetar = true
 local temMachado = false
 
+-- Animação de ataque do machado (mesma do MachadoAtaque.client.lua)
+local animacaoAtaque = Instance.new("Animation")
+animacaoAtaque.AnimationId = "rbxassetid://522635514"  -- Tool slash
+local trackAtaque = nil
+
+-- Carregar animação quando personagem spawnar
+local function carregarAnimacao()
+	local char = player.Character
+	if char then
+		local humanoid = char:FindFirstChildOfClass("Humanoid")
+		if humanoid then
+			trackAtaque = humanoid:LoadAnimation(animacaoAtaque)
+		end
+	end
+end
+
+carregarAnimacao()
+player.CharacterAdded:Connect(function(newCharacter)
+	character = newCharacter
+	humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+	task.wait(0.1) -- Aguardar humanoid carregar
+	carregarAnimacao()
+end)
+
 -- Verificar se está segurando machado
 local function verificarMachado()
 	local char = player.Character
@@ -203,6 +227,11 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 			if not podeGolpear then return end
 			podeGolpear = false
 			
+			-- Tocar animação de ataque (mesma do clique no machado)
+			if trackAtaque then
+				trackAtaque:Play()
+			end
+			
 			-- Enviar evento ao servidor (nome da árvore)
 			cortarArvoreEvento:FireServer(objetoProximo.Name, "cortar")
 			
@@ -227,12 +256,6 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 			podeColetar = true
 		end
 	end
-end)
-
--- Resetar quando respawnar
-player.CharacterAdded:Connect(function(newCharacter)
-	character = newCharacter
-	humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 end)
 
 print("✅ Sistema de corte de árvores carregado!")
