@@ -330,33 +330,42 @@ local function spawnarArvore(tipo, posicao, rotacao, nomeSpawn)
 	-- Encontrar altura real do terreno
 	local alturaY = getAlturaTerreno(posicao.X, posicao.Z)
 	
-	-- Ajustar posição base
-	local posicaoFinal = Vector3.new(posicao.X, alturaY, posicao.Z)
+	-- Primeiro posicionar o modelo no chão (sem rotação ainda) para calcular o offset
+	novaArvore:PivotTo(CFrame.new(posicao.X, alturaY, posicao.Z))
 	
-	-- Encontrar a parte mais baixa para alinhar corretamente
-	local parteMaisBaixa = nil
-	local menorY = math.huge
+	-- Encontrar o ponto mais baixo do modelo em relação ao seu pivot
+	local menorYLocal = math.huge
 	
 	for _, parte in pairs(novaArvore:GetDescendants()) do
 		if parte:IsA("BasePart") then
-			local baseY = parte.Position.Y - (parte.Size.Y / 2)
-			if baseY < menorY then
-				menorY = baseY
-				parteMaisBaixa = parte
+			-- Posição local em relação ao pivot do modelo
+			local posicaoLocal = novaArvore.PrimaryPart and 
+				parte.Position - novaArvore.PrimaryPart.Position or
+				Vector3.new(0, 0, 0)
+			
+			-- Se não tem PrimaryPart, calcula em relação ao primeiro BasePart
+			if not novaArvore.PrimaryPart then
+				local modeloCFrame = novaArvore:GetPivot()
+				posicaoLocal = parte.Position - modeloCFrame.Position
+			end
+			
+			local baseYLocal = posicaoLocal.Y - (parte.Size.Y / 2)
+			if baseYLocal < menorYLocal then
+				menorYLocal = baseYLocal
 			end
 		end
 	end
 	
-	-- Calcular offset se necessário
-	local offsetY = 0
-	if parteMaisBaixa then
-		local modeloCFrame = novaArvore:GetPivot()
-		local relativo = parteMaisBaixa.Position - modeloCFrame.Position
-		offsetY = parteMaisBaixa.Size.Y / 2
+	-- Se não achou nenhuma parte, usar 0
+	if menorYLocal == math.huge then
+		menorYLocal = 0
 	end
 	
-	-- Posicionar com rotação
-	novaArvore:PivotTo(CFrame.new(posicaoFinal.X, alturaY + offsetY, posicaoFinal.Z) * CFrame.Angles(0, math.rad(rotacao), 0))
+	-- Ajustar a posição Y para que o ponto mais baixo fique no terreno
+	local posicaoFinalY = alturaY - menorYLocal
+	
+	-- Posicionar finalmente com a rotação
+	novaArvore:PivotTo(CFrame.new(posicao.X, posicaoFinalY, posicao.Z) * CFrame.Angles(0, math.rad(rotacao), 0))
 	novaArvore.Parent = pastaMapa
 	
 	for _, parte in pairs(novaArvore:GetDescendants()) do
