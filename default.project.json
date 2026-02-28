@@ -43,6 +43,9 @@
       "$ignoreUnknownInstances": true,
       "EventosJogo": {
         "$className": "Folder"
+      },
+      "MachadoAtaqueTemplate": {
+        "$path": "Scripts/MachadoAtaque.client.lua"
       }
     },
     "ServerScriptService": {

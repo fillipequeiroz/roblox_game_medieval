@@ -143,6 +143,18 @@ local function criarMachado()
 	-- Destruir o modelo vazio
 	machado:Destroy()
 	
+	-- Adicionar script de ataque (não mexe na estrutura do machado)
+	local ReplicatedStorage = game:GetService("ReplicatedStorage")
+	local scriptTemplate = ReplicatedStorage:FindFirstChild("MachadoAtaqueTemplate")
+	if scriptTemplate then
+		local scriptAtaque = scriptTemplate:Clone()
+		scriptAtaque.Name = "MachadoAtaque"
+		scriptAtaque.Parent = tool
+		print("📝 Script de ataque adicionado ao machado")
+	else
+		print("⚠️ Template MachadoAtaque não encontrado")
+	end
+	
 	return tool
 end
 
