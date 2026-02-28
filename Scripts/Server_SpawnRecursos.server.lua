@@ -2,6 +2,7 @@
 -- Spawna árvores, rocks e sticks nas posições fixas do mapa
 
 local Workspace = game:GetService("Workspace")
+local ServerStorage = game:GetService("ServerStorage")
 local Terrain = Workspace:FindFirstChildOfClass("Terrain")
 
 -- Configuração
@@ -319,7 +320,11 @@ local totalPedras = 0
 
 -- Spawnar árvore
 local function spawnarArvore(tipo, posicao, rotacao, nomeSpawn)
-	local modeloOriginal = Workspace:FindFirstChild(tipo)
+	-- Buscar no ServerStorage primeiro, depois no Workspace (fallback)
+	local modeloOriginal = ServerStorage:FindFirstChild(tipo)
+	if not modeloOriginal then
+		modeloOriginal = Workspace:FindFirstChild(tipo)
+	end
 	if not modeloOriginal then
 		return false
 	end
@@ -381,7 +386,12 @@ end
 
 -- Spawnar galho
 local function spawnarGalho(posicao, rotacao, nomeSpawn)
-	local modeloOriginal = Workspace:FindFirstChild("smallStick") or Workspace:FindFirstChild("StickRecurso")
+	-- Buscar no ServerStorage primeiro
+	local modeloOriginal = ServerStorage:FindFirstChild("smallStick") or ServerStorage:FindFirstChild("StickRecurso")
+	if not modeloOriginal then
+		-- Fallback para Workspace
+		modeloOriginal = Workspace:FindFirstChild("smallStick") or Workspace:FindFirstChild("StickRecurso")
+	end
 	if not modeloOriginal then
 		return false
 	end
@@ -406,7 +416,12 @@ end
 
 -- Spawnar pedra
 local function spawnarPedra(posicao, escala, rotacao, nomeSpawn)
-	local modeloOriginal = Workspace:FindFirstChild("smallRockStone")
+	-- Buscar no ServerStorage primeiro
+	local modeloOriginal = ServerStorage:FindFirstChild("smallRockStone")
+	if not modeloOriginal then
+		-- Fallback para Workspace
+		modeloOriginal = Workspace:FindFirstChild("smallRockStone")
+	end
 	if not modeloOriginal then
 		return false
 	end

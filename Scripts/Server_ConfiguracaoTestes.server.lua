@@ -3,6 +3,7 @@
 
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
+local ServerStorage = game:GetService("ServerStorage")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 -- CONFIGURAÇÕES DE TESTE
@@ -21,14 +22,24 @@ _G.DadosJogadores = _G.DadosJogadores or {}
 
 -- Função para criar machado de teste (mesma lógica do Server_Crafting)
 local function criarMachadoTeste()
-	local modeloOriginal = Workspace:FindFirstChild("Axe") 
-		or Workspace:FindFirstChild("Machado")
-		or Workspace:FindFirstChild("AxeModel")
+	-- Buscar no ServerStorage primeiro
+	local modeloOriginal = ServerStorage:FindFirstChild("Axe") 
+		or ServerStorage:FindFirstChild("Machado")
+		or ServerStorage:FindFirstChild("AxeModel")
+	
+	-- Fallback para Workspace
+	if not modeloOriginal then
+		modeloOriginal = Workspace:FindFirstChild("Axe") 
+			or Workspace:FindFirstChild("Machado")
+			or Workspace:FindFirstChild("AxeModel")
+	end
 	
 	if not modeloOriginal then
 		print("⚠️ Modelo Axe não encontrado para teste!")
 		return nil
 	end
+	
+	print("🪓 Modelo Axe encontrado em: " .. modeloOriginal.Parent.Name)
 	
 	local tool = Instance.new("Tool")
 	tool.Name = "Machado"

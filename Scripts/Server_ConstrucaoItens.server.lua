@@ -2,6 +2,7 @@
 -- Processa a construção de itens com sistema de hotbar + preview
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerStorage = game:GetService("ServerStorage")
 local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
 
@@ -155,13 +156,33 @@ construirItemEvento.OnServerEvent:Connect(function(player, acao, item, posicao)
 			end
 		end
 		
-		-- Spawnar workbench
-		local modelo = Workspace:FindFirstChild("Workbench") 
-			or Workspace:FindFirstChild("Bancada")
-			or Workspace:FindFirstChild("WorkbenchModel")
-			or Workspace:FindFirstChild("WorkBench4Script")
+		-- Spawnar workbench (buscar template no ReplicatedStorage)
+		local modelo = ReplicatedStorage:FindFirstChild("Workbench") 
+			or ReplicatedStorage:FindFirstChild("Bancada")
+			or ReplicatedStorage:FindFirstChild("WorkbenchModel")
+			or ReplicatedStorage:FindFirstChild("WorkBench4Script")
+			or ReplicatedStorage:FindFirstChild("WorkBench")
+		
+		if not modelo then
+			-- Fallback: tentar no ServerStorage depois Workspace
+			print("⚠️ Workbench não encontrado no ReplicatedStorage, tentando ServerStorage...")
+			modelo = ServerStorage:FindFirstChild("Workbench") 
+				or ServerStorage:FindFirstChild("Bancada")
+				or ServerStorage:FindFirstChild("WorkbenchModel")
+				or ServerStorage:FindFirstChild("WorkBench4Script")
+				or ServerStorage:FindFirstChild("WorkBench")
+			
+			if not modelo then
+				print("⚠️ Workbench não encontrado no ServerStorage, tentando Workspace...")
+				modelo = Workspace:FindFirstChild("Workbench", true) 
+					or Workspace:FindFirstChild("Bancada", true)
+					or Workspace:FindFirstChild("WorkbenchModel", true)
+					or Workspace:FindFirstChild("WorkBench4Script", true)
+			end
+		end
 		
 		if modelo then
+			print("   📦 Template encontrado: " .. modelo.Name .. " em " .. modelo.Parent.Name)
 			local novo = modelo:Clone()
 			novo.Name = "Workbench_" .. player.Name .. "_" .. tostring(math.floor(tick()))
 			

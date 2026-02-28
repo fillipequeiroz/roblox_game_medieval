@@ -4,6 +4,7 @@
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerStorage = game:GetService("ServerStorage")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
@@ -454,29 +455,27 @@ end
 function criarPreview(tipoItem)
 	print("🔍 Buscando modelo para preview de: " .. tostring(tipoItem))
 	
-	-- Buscar modelo no Workspace (tenta vários nomes possíveis, incluindo subpastas)
+	-- Buscar modelo no ReplicatedStorage (cliente pode acessar)
 	local modeloOriginal = nil
 	local possiveisNomes = {"Workbench", "Bancada", "WorkbenchModel", "CraftingTable", "WorkBench4Script", tipoItem, "Model"}
 	
-	-- Primeiro tenta busca recursiva em subpastas
+	-- Primeiro tenta busca no ReplicatedStorage
 	for _, nome in ipairs(possiveisNomes) do
-		modeloOriginal = Workspace:FindFirstChild(nome, true) -- true = recursive search
+		modeloOriginal = ReplicatedStorage:FindFirstChild(nome)
 		if modeloOriginal then
-			print("✅ Modelo encontrado (recursivo): " .. modeloOriginal.Name .. " em " .. modeloOriginal.Parent:GetFullName())
+			print("✅ Modelo encontrado no ReplicatedStorage: " .. modeloOriginal.Name)
 			break
 		end
 	end
 	
-	-- Se não achou, faz busca manual em todos os descendentes
+	-- Se não achou no ReplicatedStorage, tenta no Workspace (fallback)
 	if not modeloOriginal then
-		for _, obj in pairs(Workspace:GetDescendants()) do
-			if obj:IsA("Model") then
-				local nomeLower = obj.Name:lower()
-				if nomeLower:find("bench") or nomeLower:find("bancada") or nomeLower:find("craft") or nomeLower:find("work") then
-					modeloOriginal = obj
-					print("✅ Modelo encontrado (busca ampla): " .. modeloOriginal.Name .. " em " .. modeloOriginal.Parent:GetFullName())
-					break
-				end
+		print("⚠️ Modelo não encontrado no ReplicatedStorage, tentando Workspace...")
+		for _, nome in ipairs(possiveisNomes) do
+			modeloOriginal = Workspace:FindFirstChild(nome, true)
+			if modeloOriginal then
+				print("✅ Modelo encontrado no Workspace: " .. modeloOriginal.Name)
+				break
 			end
 		end
 	end

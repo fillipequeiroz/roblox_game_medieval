@@ -72,9 +72,20 @@ local templateTronco = nil
 
 -- Encontrar modelo Tronco e criar template
 local function inicializarTemplateTronco()
-	local tronco = Workspace:FindFirstChild("Tronco")
+	local ServerStorage = game:GetService("ServerStorage")
+	
+	-- Buscar no ServerStorage primeiro
+	local tronco = ServerStorage:FindFirstChild("Tronco")
+	local origem = "ServerStorage"
+	
+	-- Se não achou, tenta no Workspace
+	if not tronco then
+		tronco = Workspace:FindFirstChild("Tronco")
+		origem = "Workspace"
+	end
+	
 	if tronco then
-		-- Clonar o modelo para usar como template (o original pode ser destruído)
+		-- Clonar o modelo para usar como template
 		templateTronco = tronco:Clone()
 		templateTronco.Name = "Tronco_Template"
 		templateTronco.Parent = nil -- Não fica no workspace, só na memória
@@ -83,10 +94,10 @@ local function inicializarTemplateTronco()
 		for _, p in pairs(templateTronco:GetDescendants()) do
 			if p:IsA("BasePart") then partes = partes + 1 end
 		end
-		print("🪵 Template Tronco criado com " .. partes .. " partes (Tipo: " .. templateTronco.ClassName .. ")")
+		print("🪵 Template Tronco criado com " .. partes .. " partes (de " .. origem .. ")")
 		return true
 	else
-		print("⚠️ Modelo Tronco NÃO encontrado no Workspace!")
+		print("⚠️ Modelo Tronco NÃO encontrado no ServerStorage nem Workspace!")
 		return false
 	end
 end

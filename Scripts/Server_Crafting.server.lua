@@ -4,6 +4,7 @@
 print("🔨 SERVER CRAFTING INICIANDO...")
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerStorage = game:GetService("ServerStorage")
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 
@@ -35,13 +36,20 @@ local dadosJogadores = _G.DadosJogadores
 
 -- Criar ferramenta genérica a partir de um modelo
 local function criarFerramenta(nome, modeloNome, toolTip, escala)
-	-- Buscar o modelo no Workspace
-	local modeloOriginal = Workspace:FindFirstChild(modeloNome)
-		or Workspace:FindFirstChild(nome)
-		or Workspace:FindFirstChild(modeloNome .. "Model")
+	-- Buscar o modelo no ServerStorage primeiro
+	local modeloOriginal = ServerStorage:FindFirstChild(modeloNome)
+		or ServerStorage:FindFirstChild(nome)
+		or ServerStorage:FindFirstChild(modeloNome .. "Model")
+	
+	-- Fallback para Workspace
+	if not modeloOriginal then
+		modeloOriginal = Workspace:FindFirstChild(modeloNome)
+			or Workspace:FindFirstChild(nome)
+			or Workspace:FindFirstChild(modeloNome .. "Model")
+	end
 	
 	if not modeloOriginal then
-		print("⚠️ Modelo " .. modeloNome .. " não encontrado no Workspace!")
+		print("⚠️ Modelo " .. modeloNome .. " não encontrado no ServerStorage nem Workspace!")
 		return nil
 	end
 	
