@@ -90,7 +90,7 @@ local function verificarItensProximos()
 	for _, objeto in pairs(workspace:GetDescendants()) do
 		if objeto:IsA("Model") or objeto:IsA("Part") or objeto:IsA("MeshPart") then
 			local tipoRecurso = objeto:GetAttribute("TipoRecurso")
-			if tipoRecurso == "Stick" or tipoRecurso == "Pau" or tipoRecurso == "Pedra" or tipoRecurso == "Stone" then
+			if tipoRecurso == "Stick" or tipoRecurso == "Graveto" or tipoRecurso == "Pedra" or tipoRecurso == "Stone" then
 				local sucesso, posicao = pcall(function()
 					return objeto:GetPivot().Position
 				end)

@@ -53,17 +53,17 @@ titulo.TextSize = 18
 titulo.Font = Enum.Font.GothamBold
 titulo.Parent = frame
 
--- Texto Paus
-local textoPaus = Instance.new("TextLabel")
-textoPaus.Size = UDim2.new(1, -20, 0, 25)
-textoPaus.Position = UDim2.new(0, 10, 0, 40)
-textoPaus.BackgroundTransparency = 1
-textoPaus.Text = "🌿 Gravetos: 0"
-textoPaus.TextColor3 = Color3.fromRGB(100, 200, 100)
-textoPaus.TextSize = 16
-textoPaus.Font = Enum.Font.Gotham
-textoPaus.TextXAlignment = Enum.TextXAlignment.Left
-textoPaus.Parent = frame
+-- Texto Gravetos
+local textoGravetos = Instance.new("TextLabel")
+textoGravetos.Size = UDim2.new(1, -20, 0, 25)
+textoGravetos.Position = UDim2.new(0, 10, 0, 40)
+textoGravetos.BackgroundTransparency = 1
+textoGravetos.Text = "🌿 Gravetos: 0"
+textoGravetos.TextColor3 = Color3.fromRGB(100, 200, 100)
+textoGravetos.TextSize = 16
+textoGravetos.Font = Enum.Font.Gotham
+textoGravetos.TextXAlignment = Enum.TextXAlignment.Left
+textoGravetos.Parent = frame
 
 -- Texto Madeira
 local textoMadeira = Instance.new("TextLabel")
@@ -124,7 +124,7 @@ end)
 
 -- Atualizar inventário
 atualizarInventario.OnClientEvent:Connect(function(inventario)
-	textoPaus.Text = "🌿 Gravetos: " .. (inventario.paus or 0)
+	textoGravetos.Text = "🌿 Gravetos: " .. (inventario.gravetos or 0)
 	textoMadeira.Text = "🪵 Madeira: " .. (inventario.madeira or 0)
 	textoPedra.Text = "🪨 Pedra: " .. (inventario.pedra or 0)
 end)

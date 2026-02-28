@@ -267,5 +267,5 @@ end)
 
 print("✅ Servidor de Crafting inicializado!")
 print("   📋 Receitas disponíveis:")
-print("      🪓 Machado = 1 Pau")
-print("      ⛏️ Picareta = 2 Paus")
+print("      🪓 Machado = 1 Graveto")
+print("      ⛏️ Picareta = 2 Gravetos")

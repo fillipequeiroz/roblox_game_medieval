@@ -12,7 +12,7 @@ local CONFIG_TESTES = {
 	INICIAR_COM_MACHADO = true,
 	
 	-- Jogador inicia com recursos?
-	PAUS_INICIAIS = 10,
+	GRAVETOS_INICIAIS = 10,
 	MADEIRA_INICIAL = 10,
 	PEDRA_INICIAL = 5,
 }
@@ -178,7 +178,7 @@ local function inicializarJogadorTeste(player)
 	-- Configurar recursos iniciais
 	local dados = _G.DadosJogadores[player.UserId]
 	if dados then
-		dados.inventario.gravetos = CONFIG_TESTES.PAUS_INICIAIS
+		dados.inventario.gravetos = CONFIG_TESTES.GRAVETOS_INICIAIS
 		dados.inventario.madeira = CONFIG_TESTES.MADEIRA_INICIAL
 		dados.inventario.pedra = CONFIG_TESTES.PEDRA_INICIAL
 		

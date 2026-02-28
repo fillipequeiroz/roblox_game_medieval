@@ -109,10 +109,10 @@ local function processarColeta(player, item)
 	item:Destroy()
 	
 	-- Processar baseado no tipo
-	if tipoRecurso == "Stick" or tipoRecurso == "Pau" then
+	if tipoRecurso == "Stick" or tipoRecurso == "Graveto" then
 		dados.inventario.gravetos = dados.inventario.gravetos + 1
 		atualizarInventario:FireClient(player, dados.inventario)
-		print("🌿 " .. player.Name .. " coletou 1 Pau (Total: " .. dados.inventario.gravetos .. ")")
+		print("🌿 " .. player.Name .. " coletou 1 Graveto (Total: " .. dados.inventario.gravetos .. ")")
 		
 		-- Respawn
 		task.spawn(function()

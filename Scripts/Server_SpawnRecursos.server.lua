@@ -407,7 +407,7 @@ local function spawnarGalho(posicao, rotacao, nomeSpawn)
 		if parte:IsA("BasePart") then
 			parte.Anchored = true
 			parte.CanCollide = true
-			parte:SetAttribute("TipoRecurso", "Pau")
+			parte:SetAttribute("TipoRecurso", "Graveto")
 		end
 	end
 	
