@@ -54,23 +54,30 @@ end
 local function respawnarItem(template, posicao)
 	task.wait(TEMPO_RESPAWN)
 	
-	if not template then return end
+	if not template then 
+		print("⚠️ Template não existe mais")
+		return 
+	end
 	
-	local novoItem = template:Clone()
-	novoItem:SetAttribute("TipoRecurso", template:GetAttribute("TipoRecurso"))
-	
-	-- Diminuir o tamanho (escala 0.5 = metade do tamanho)
-	local escala = 0.5
-	for _, parte in pairs(novoItem:GetDescendants()) do
-		if parte:IsA("BasePart") then
-			parte.Size = parte.Size * escala
+	-- Verificar se já existe um item na mesma posição
+	for _, obj in pairs(workspace:GetDescendants()) do
+		if obj:IsA("Model") and obj.Name:find(template.Name) then
+			local dist = (obj:GetPivot().Position - posicao).Magnitude
+			if dist < 2 then
+				print("⚠️ Já existe item nesta posição, não respawnando")
+				return
+			end
 		end
 	end
+	
+	local novoItem = template:Clone()
+	novoItem.Name = template.Name .. "_Respawn"
+	novoItem:SetAttribute("TipoRecurso", template:GetAttribute("TipoRecurso"))
 	
 	novoItem:PivotTo(CFrame.new(posicao))
 	novoItem.Parent = workspace
 	
-	print("🔄 Item respawnado: " .. template.Name)
+	print("🔄 Item respawnado: " .. template.Name .. " em " .. tostring(posicao))
 end
 
 -- Processar coleta

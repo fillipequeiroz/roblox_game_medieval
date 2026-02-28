@@ -54,6 +54,9 @@
       "ServerConfigurarPedras": {
         "$path": "Scripts/Server_ConfigurarPedras.server.lua"
       },
+      "ServerSpawnRecursos": {
+        "$path": "Scripts/Server_SpawnRecursos.server.lua"
+      },
       "ServerConstrucao": {
         "$path": "Scripts/Server_Construcao.server.lua"
       },
