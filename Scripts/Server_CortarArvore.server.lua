@@ -40,6 +40,24 @@ local function encontrarModeloTronco()
 	return Workspace:FindFirstChild("Tronco")
 end
 
+-- Função para encontrar posição base da árvore
+local function getPosicaoBaseArvore(arvore)
+	local menorY = math.huge
+	local posicaoBase = arvore:GetPivot().Position
+	
+	for _, parte in pairs(arvore:GetDescendants()) do
+		if parte:IsA("BasePart") then
+			local baseY = parte.Position.Y - (parte.Size.Y / 2)
+			if baseY < menorY then
+				menorY = baseY
+				posicaoBase = Vector3.new(parte.Position.X, baseY, parte.Position.Z)
+			end
+		end
+	end
+	
+	return posicaoBase
+end
+
 -- Processar golpe
 local function processarGolpe(player, nomeArvore)
 	print("🪓 Evento recebido: player=" .. tostring(player.Name) .. ", arvore=" .. tostring(nomeArvore))
@@ -57,16 +75,20 @@ local function processarGolpe(player, nomeArvore)
 		return
 	end
 	
-	-- Verificar distância
+	-- Verificar distância (pela base da árvore)
 	local character = player.Character
 	if not character then return end
 	
 	local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
 	if not humanoidRootPart then return end
 	
-	local distancia = (humanoidRootPart.Position - arvore:GetPivot().Position).Magnitude
-	if distancia > 10 then
-		print("⚠️ " .. player.Name .. " muito longe da árvore!")
+	local posicaoBase = getPosicaoBaseArvore(arvore)
+	local posicaoPlayer = humanoidRootPart.Position
+	-- Comparar apenas X e Z (distância horizontal)
+	local distanciaHorizontal = Vector3.new(posicaoPlayer.X - posicaoBase.X, 0, posicaoPlayer.Z - posicaoBase.Z).Magnitude
+	
+	if distanciaHorizontal > 12 then
+		print("⚠️ " .. player.Name .. " muito longe da árvore! Dist: " .. distanciaHorizontal)
 		return
 	end
 	

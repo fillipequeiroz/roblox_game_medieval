@@ -69,7 +69,31 @@ local function verificarMachado()
 	return false
 end
 
--- Encontrar árvore próxima
+-- Encontrar a posição mais baixa da árvore (base do tronco)
+local function getPosicaoBaseArvore(arvore)
+	local menorY = math.huge
+	local posicaoBase = nil
+	
+	for _, parte in pairs(arvore:GetDescendants()) do
+		if parte:IsA("BasePart") then
+			-- Posição Y da base da parte (centro Y - metade da altura)
+			local baseY = parte.Position.Y - (parte.Size.Y / 2)
+			if baseY < menorY then
+				menorY = baseY
+				posicaoBase = Vector3.new(parte.Position.X, baseY, parte.Position.Z)
+			end
+		end
+	end
+	
+	-- Se não achou parte, usa o pivot
+	if not posicaoBase then
+		return arvore:GetPivot().Position
+	end
+	
+	return posicaoBase
+end
+
+-- Encontrar árvore próxima (pela base)
 local function encontrarArvoreProxima()
 	if not humanoidRootPart then return nil end
 	
@@ -83,12 +107,15 @@ local function encontrarArvoreProxima()
 			local isArvore = objeto.Name:find("Tree") or objeto.Name:find("Arvore") or objeto:GetAttribute("TipoRecurso") == "Madeira"
 			
 			if isArvore then
-				local sucesso, posicao = pcall(function()
-					return objeto:GetPivot().Position
+				local sucesso, posicaoBase = pcall(function()
+					return getPosicaoBaseArvore(objeto)
 				end)
 				
-				if sucesso and posicao then
-					local distancia = (posicaoPlayer - posicao).Magnitude
+				if sucesso and posicaoBase then
+					-- Usar apenas X e Z para distância horizontal, Y do player
+					local posicaoHorizontal = Vector3.new(posicaoBase.X, posicaoPlayer.Y, posicaoBase.Z)
+					local distancia = (posicaoPlayer - posicaoHorizontal).Magnitude
+					
 					if distancia < menorDistancia then
 						menorDistancia = distancia
 						arvoreMaisProxima = objeto

@@ -69,7 +69,10 @@ local function carregarModelos()
 		local arvore = Workspace:FindFirstChild("Tree" .. i)
 		if arvore then
 			modelosArvores[i] = arvore
-			print("🌲 Árvore " .. i .. " carregada")
+			-- Configurar árvore original para ser cortável
+			arvore:SetAttribute("TipoRecurso", "Madeira")
+			arvore:SetAttribute("Vida", 3)
+			print("🌲 Árvore " .. i .. " carregada e configurada")
 		end
 	end
 	
