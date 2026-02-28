@@ -199,51 +199,52 @@ local function processarColetaTronco(player, nomeTronco)
 		return 
 	end
 	
-	-- Encontrar o tronco pelo nome EXATO primeiro
-	local tronco = nil
-	for _, objeto in pairs(Workspace:GetDescendants()) do
-		if objeto:IsA("Model") and objeto.Name == nomeTronco then
-			tronco = objeto
-			print("🪵 Tronco encontrado pelo nome: " .. objeto.Name)
-			break
-		end
-	end
-	
-	-- Se não achou pelo nome, busca pelo atributo (fallback)
-	if not tronco then
-		for _, objeto in pairs(Workspace:GetDescendants()) do
-			if objeto:IsA("Model") and objeto:GetAttribute("TipoRecurso") == "Tronco" then
-				tronco = objeto
-				print("🪵 Tronco encontrado pelo atributo: " .. objeto.Name)
-				break
-			end
-		end
-	end
-	
-	if not tronco then
-		print("⚠️ Tronco '" .. nomeTronco .. "' não encontrado no Workspace")
-		return
-	end
-	
-	-- Verificar distância
+	-- Verificar distância do player
 	local character = player.Character
 	if not character then return end
 	
 	local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
 	if not humanoidRootPart then return end
-	
-	local posicaoBase = getPosicaoBaseArvore(tronco)
 	local posicaoPlayer = humanoidRootPart.Position
-	local distanciaHorizontal = Vector3.new(posicaoPlayer.X - posicaoBase.X, 0, posicaoPlayer.Z - posicaoBase.Z).Magnitude
 	
-	if distanciaHorizontal > 12 then
-		print("⚠️ " .. player.Name .. " muito longe do tronco! Dist: " .. distanciaHorizontal)
+	-- Buscar o tronco mais próximo do jogador (independente do nome)
+	local troncoMaisProximo = nil
+	local menorDistancia = 12 -- Distância máxima permitida
+	
+	for _, objeto in pairs(Workspace:GetDescendants()) do
+		if objeto:IsA("Model") and objeto:GetAttribute("TipoRecurso") == "Tronco" then
+			local posicaoBase = getPosicaoBaseArvore(objeto)
+			local distancia = Vector3.new(posicaoPlayer.X - posicaoBase.X, 0, posicaoPlayer.Z - posicaoBase.Z).Magnitude
+			
+			if distancia < menorDistancia then
+				menorDistancia = distancia
+				troncoMaisProximo = objeto
+			end
+		end
+	end
+	
+	-- Se não achou pelo atributo, tenta pelo nome (fallback para compatibilidade)
+	local tronco = troncoMaisProximo
+	if not tronco then
+		for _, objeto in pairs(Workspace:GetDescendants()) do
+			if objeto:IsA("Model") and objeto.Name == nomeTronco then
+				tronco = objeto
+				print("🪵 Tronco encontrado pelo nome (fallback): " .. objeto.Name)
+				break
+			end
+		end
+	else
+		print("🪵 Tronco mais próximo encontrado: " .. tronco.Name .. " | Dist: " .. menorDistancia)
+	end
+	
+	if not tronco then
+		print("⚠️ Nenhum tronco encontrado perto de " .. player.Name)
 		return
 	end
 	
 	-- Destruir tronco
 	tronco:Destroy()
-	print("🪵 Tronco '" .. nomeTronco .. "' coletado!")
+	print("🪵 Tronco coletado!")
 	
 	-- Adicionar madeira ao inventário
 	local dados = dadosJogadores[player.UserId]
