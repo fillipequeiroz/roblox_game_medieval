@@ -52,9 +52,11 @@ avisoTexto.Font = Enum.Font.GothamBold
 avisoTexto.Parent = avisoFrame
 
 -- Variáveis
-local arvoreProxima = nil
+local objetoProximo = nil
+local tipoObjeto = nil  -- "arvore" ou "tronco"
 local golpesAtuais = 0
 local podeGolpear = true
+local podeColetar = true
 local temMachado = false
 
 -- Verificar se está segurando machado
@@ -69,14 +71,27 @@ local function verificarMachado()
 	return false
 end
 
--- Encontrar a posição mais baixa da árvore (base do tronco)
-local function getPosicaoBaseArvore(arvore)
+-- Verificar se é um tronco
+local function checkIsTronco(objeto)
+	local nomeTemTronco = objeto.Name:find("Tronco")
+	local atributoTronco = objeto:GetAttribute("TipoRecurso") == "Tronco"
+	return nomeTemTronco or atributoTronco
+end
+
+-- Encontrar a posição mais baixa do objeto (base)
+local function getPosicaoBase(objeto)
+	-- Se for BasePart diretamente, usa ele mesmo
+	if objeto:IsA("BasePart") then
+		local baseY = objeto.Position.Y - (objeto.Size.Y / 2)
+		return Vector3.new(objeto.Position.X, baseY, objeto.Position.Z)
+	end
+	
+	-- Se for Model, procura a parte mais baixa
 	local menorY = math.huge
 	local posicaoBase = nil
 	
-	for _, parte in pairs(arvore:GetDescendants()) do
+	for _, parte in pairs(objeto:GetDescendants()) do
 		if parte:IsA("BasePart") then
-			-- Posição Y da base da parte (centro Y - metade da altura)
 			local baseY = parte.Position.Y - (parte.Size.Y / 2)
 			if baseY < menorY then
 				menorY = baseY
@@ -87,28 +102,30 @@ local function getPosicaoBaseArvore(arvore)
 	
 	-- Se não achou parte, usa o pivot
 	if not posicaoBase then
-		return arvore:GetPivot().Position
+		return objeto:GetPivot().Position
 	end
 	
 	return posicaoBase
 end
 
--- Encontrar árvore próxima (pela base)
+-- Encontrar árvore ou tronco próximo (pela base)
 local function encontrarArvoreProxima()
-	if not humanoidRootPart then return nil end
+	if not humanoidRootPart then return nil, nil end
 	
 	local posicaoPlayer = humanoidRootPart.Position
-	local arvoreMaisProxima = nil
+	local objetoMaisProximo = nil
 	local menorDistancia = DISTANCIA_CORTE
+	local tipoObjeto = nil
 	
 	for _, objeto in pairs(Workspace:GetDescendants()) do
 		if objeto:IsA("Model") then
-			-- Verificar se é uma árvore (Tree ou TreeSpawn)
+			-- Verificar se é árvore ou tronco
 			local isArvore = objeto.Name:find("Tree") or objeto.Name:find("Arvore") or objeto:GetAttribute("TipoRecurso") == "Madeira"
+			local troncoCheck = checkIsTronco(objeto)
 			
-			if isArvore then
+			if isArvore or troncoCheck then
 				local sucesso, posicaoBase = pcall(function()
-					return getPosicaoBaseArvore(objeto)
+					return getPosicaoBase(objeto)
 				end)
 				
 				if sucesso and posicaoBase then
@@ -118,67 +135,97 @@ local function encontrarArvoreProxima()
 					
 					if distancia < menorDistancia then
 						menorDistancia = distancia
-						arvoreMaisProxima = objeto
+						objetoMaisProximo = objeto
+						tipoObjeto = troncoCheck and "tronco" or "arvore"
 					end
 				end
 			end
 		end
 	end
 	
-	return arvoreMaisProxima
+	return objetoMaisProximo, tipoObjeto
 end
 
 -- Atualizar GUI
 RunService.RenderStepped:Connect(function()
 	temMachado = verificarMachado()
 	
-	if not temMachado then
-		avisoFrame.Visible = false
-		arvoreProxima = nil
-		return
-	end
+	local novoObjeto, novoTipo = encontrarArvoreProxima()
 	
-	local novaArvore = encontrarArvoreProxima()
-	
-	-- Se mudou de árvore, resetar contador
-	if novaArvore ~= arvoreProxima then
-		arvoreProxima = novaArvore
+	-- Se mudou de objeto, resetar contador
+	if novoObjeto ~= objetoProximo then
+		objetoProximo = novoObjeto
+		tipoObjeto = novoTipo
 		golpesAtuais = 0
 	end
 	
-	if arvoreProxima then
-		avisoFrame.Visible = true
+	if objetoProximo then
+		-- Verificar se pode interagir (tronco não precisa de machado, árvore sim)
+		local podeInteragir = (tipoObjeto == "tronco") or (tipoObjeto == "arvore" and temMachado)
 		
-		-- Animar
-		local tempo = tick()
-		local escala = 1 + math.sin(tempo * 3) * 0.02
-		avisoFrame.Size = UDim2.new(0, 250 * escala, 0, 50 * escala)
-		
-		avisoTexto.Text = "🪓 Pressione [E] para cortar\n🌲 Árvore (" .. golpesAtuais .. "/1)"
+		if podeInteragir then
+			avisoFrame.Visible = true
+			
+			-- Animar
+			local tempo = tick()
+			local escala = 1 + math.sin(tempo * 3) * 0.02
+			avisoFrame.Size = UDim2.new(0, 250 * escala, 0, 50 * escala)
+			
+			-- Texto diferente para árvore ou tronco
+			if tipoObjeto == "tronco" then
+				avisoTexto.Text = "🪵 Pressione [E] para coletar\n🌲 Tronco"
+			else
+				avisoTexto.Text = "🪓 Pressione [E] para cortar\n🌲 Árvore (" .. golpesAtuais .. "/1)"
+			end
+		else
+			-- Tem árvore mas não tem machado
+			avisoFrame.Visible = true
+			avisoTexto.Text = "⚠️ Necessário Machado\n🌲 Árvore"
+			avisoFrame.Size = UDim2.new(0, 250, 0, 50)
+		end
 	else
 		avisoFrame.Visible = false
 	end
 end)
 
--- Golpear árvore
+-- Golpear árvore ou coletar tronco
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	if gameProcessed then return end
-	if not temMachado then return end
-	if not arvoreProxima then return end
-	if not podeGolpear then return end
+	if not objetoProximo then return end
+	
+	-- Verificar se pode interagir (tronco não precisa de machado, árvore sim)
+	local podeInteragir = (tipoObjeto == "tronco") or (tipoObjeto == "arvore" and temMachado)
+	if not podeInteragir then return end
 	
 	if input.KeyCode == Enum.KeyCode.E then
-		podeGolpear = false
-		
-		-- Enviar evento ao servidor (nome da árvore)
-		cortarArvoreEvento:FireServer(arvoreProxima.Name)
-		
-		-- Feedback visual
-		golpesAtuais = golpesAtuais + 1
-		avisoTexto.Text = "🪓 Cortando... (" .. golpesAtuais .. "/1)"
-		
-		task.wait(TEMPO_ENTRE_GOLPES)
-		podeGolpear = true
+		if tipoObjeto == "arvore" then
+			-- Cortar árvore
+			if not podeGolpear then return end
+			podeGolpear = false
+			
+			-- Enviar evento ao servidor (nome da árvore)
+			cortarArvoreEvento:FireServer(objetoProximo.Name, "cortar")
+			
+			-- Feedback visual
+			golpesAtuais = golpesAtuais + 1
+			avisoTexto.Text = "🪓 Cortando... (" .. golpesAtuais .. "/1)"
+			
+			task.wait(TEMPO_ENTRE_GOLPES)
+			podeGolpear = true
+			
+		elseif tipoObjeto == "tronco" then
+			-- Coletar tronco
+			if not podeColetar then return end
+			podeColetar = false
+			
+			-- Enviar evento ao servidor (nome do tronco)
+			cortarArvoreEvento:FireServer(objetoProximo.Name, "coletar")
+			
+			avisoTexto.Text = "🪵 Coletando..."
+			
+			task.wait(0.5)
+			podeColetar = true
+		end
 	end
 end)
 

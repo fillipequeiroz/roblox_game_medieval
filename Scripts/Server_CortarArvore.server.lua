@@ -35,10 +35,37 @@ local function encontrarArvorePorNome(nomeArvore)
 	return nil
 end
 
--- Encontrar modelo Tronco
-local function encontrarModeloTronco()
-	return Workspace:FindFirstChild("Tronco")
+-- Template do tronco (cópia armazenada no início do jogo)
+local templateTronco = nil
+
+-- Encontrar modelo Tronco e criar template
+local function inicializarTemplateTronco()
+	local tronco = Workspace:FindFirstChild("Tronco")
+	if tronco then
+		-- Clonar o modelo para usar como template (o original pode ser destruído)
+		templateTronco = tronco:Clone()
+		templateTronco.Name = "Tronco_Template"
+		templateTronco.Parent = nil -- Não fica no workspace, só na memória
+		
+		local partes = 0
+		for _, p in pairs(templateTronco:GetDescendants()) do
+			if p:IsA("BasePart") then partes = partes + 1 end
+		end
+		print("🪵 Template Tronco criado com " .. partes .. " partes (Tipo: " .. templateTronco.ClassName .. ")")
+		return true
+	else
+		print("⚠️ Modelo Tronco NÃO encontrado no Workspace!")
+		return false
+	end
 end
+
+-- Retorna o template para clonar
+local function encontrarModeloTronco()
+	return templateTronco
+end
+
+-- Inicializar template IMEDIATAMENTE (antes que alguém possa coletar o tronco original)
+inicializarTemplateTronco()
 
 -- Função para encontrar posição base da árvore
 local function getPosicaoBaseArvore(arvore)
@@ -123,7 +150,7 @@ local function processarGolpe(player, nomeArvore)
 		
 		print("🌲 Árvore '" .. nomeArvore .. "' destruída!")
 		
-		-- Spawnar tronco
+		-- Spawnar tronco (estrutura Model "Tronco" com MeshPart "Base" dentro)
 		local modeloTronco = encontrarModeloTronco()
 		if modeloTronco then
 			local novoTronco = modeloTronco:Clone()
@@ -138,32 +165,107 @@ local function processarGolpe(player, nomeArvore)
 				posicao = Vector3.new(posicao.X, resultado.Position.Y, posicao.Z)
 			end
 			
+			-- Ajustar altura para o tronco ficar deitado no chão
+			posicao = posicao + Vector3.new(0, 0.5, 0)
+			
 			novoTronco:PivotTo(CFrame.new(posicao))
 			novoTronco.Parent = Workspace
 			novoTronco:SetAttribute("TipoRecurso", "Tronco")
+			
+			-- Configurar TODAS as partes do modelo
+			for _, parte in pairs(novoTronco:GetDescendants()) do
+				if parte:IsA("BasePart") then
+					parte.Anchored = true
+					parte.CanCollide = true
+				end
+			end
 			
 			print("🪵 Tronco spawnado em: " .. tostring(posicao))
 		else
 			print("⚠️ Modelo 'Tronco' não encontrado!")
 		end
 		
-		-- Adicionar madeira
-		local dados = dadosJogadores[player.UserId]
-		if dados then
-			dados.inventario.madeira = dados.inventario.madeira + 3
-			if atualizarInventario then
-				atualizarInventario:FireClient(player, dados.inventario)
-			end
-			print("🪵 " .. player.Name .. " ganhou 3 madeiras!")
-		end
+		-- Madeira só será dada quando coletar o tronco!
+		print("🪵 Tronco spawnado! Colete-o para ganhar madeiras.")
 	end
 end
 
--- Conectar evento
+-- Processar coleta de tronco (DEFINIR ANTES de usar no OnServerEvent)
+local function processarColetaTronco(player, nomeTronco)
+	print("🪵 Coletando tronco: " .. tostring(nomeTronco))
+	
+	if not player or not nomeTronco then 
+		print("⚠️ Dados inválidos para coleta")
+		return 
+	end
+	
+	-- Encontrar o tronco pelo nome EXATO primeiro
+	local tronco = nil
+	for _, objeto in pairs(Workspace:GetDescendants()) do
+		if objeto:IsA("Model") and objeto.Name == nomeTronco then
+			tronco = objeto
+			print("🪵 Tronco encontrado pelo nome: " .. objeto.Name)
+			break
+		end
+	end
+	
+	-- Se não achou pelo nome, busca pelo atributo (fallback)
+	if not tronco then
+		for _, objeto in pairs(Workspace:GetDescendants()) do
+			if objeto:IsA("Model") and objeto:GetAttribute("TipoRecurso") == "Tronco" then
+				tronco = objeto
+				print("🪵 Tronco encontrado pelo atributo: " .. objeto.Name)
+				break
+			end
+		end
+	end
+	
+	if not tronco then
+		print("⚠️ Tronco '" .. nomeTronco .. "' não encontrado no Workspace")
+		return
+	end
+	
+	-- Verificar distância
+	local character = player.Character
+	if not character then return end
+	
+	local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+	if not humanoidRootPart then return end
+	
+	local posicaoBase = getPosicaoBaseArvore(tronco)
+	local posicaoPlayer = humanoidRootPart.Position
+	local distanciaHorizontal = Vector3.new(posicaoPlayer.X - posicaoBase.X, 0, posicaoPlayer.Z - posicaoBase.Z).Magnitude
+	
+	if distanciaHorizontal > 12 then
+		print("⚠️ " .. player.Name .. " muito longe do tronco! Dist: " .. distanciaHorizontal)
+		return
+	end
+	
+	-- Destruir tronco
+	tronco:Destroy()
+	print("🪵 Tronco '" .. nomeTronco .. "' coletado!")
+	
+	-- Adicionar madeira ao inventário
+	local dados = dadosJogadores[player.UserId]
+	if dados then
+		dados.inventario.madeira = dados.inventario.madeira + 2
+		if atualizarInventario then
+			atualizarInventario:FireClient(player, dados.inventario)
+		end
+		print("🪵 " .. player.Name .. " ganhou 2 madeiras!")
+	end
+end
+
+-- Conectar evento (DEPOIS de definir todas as funções)
 print("🔗 Conectando evento CortarArvore...")
-cortarArvoreEvento.OnServerEvent:Connect(function(player, nomeArvore)
-	print("📨 Evento CortarArvore recebido de " .. player.Name)
-	processarGolpe(player, nomeArvore)
+cortarArvoreEvento.OnServerEvent:Connect(function(player, nomeObjeto, acao)
+	print("📨 Evento recebido de " .. player.Name .. " - Objeto: " .. tostring(nomeObjeto) .. " - Ação: " .. tostring(acao))
+	
+	if acao == "coletar" then
+		processarColetaTronco(player, nomeObjeto)
+	else
+		processarGolpe(player, nomeObjeto)
+	end
 end)
 
 -- Limpar tabela periodicamente
@@ -179,4 +281,4 @@ task.spawn(function()
 	end
 end)
 
-print("✅ Servidor de corte de árvores inicializado!")
+print("✅ Servidor de corte de árvores e coleta de troncos inicializado!")
