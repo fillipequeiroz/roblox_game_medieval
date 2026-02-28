@@ -33,40 +33,40 @@ end
 _G.DadosJogadores = _G.DadosJogadores or {}
 local dadosJogadores = _G.DadosJogadores
 
--- Modelo do Machado (clonado do modelo importado no Workspace)
-local function criarMachado()
-	-- Buscar o modelo Axe no Workspace
-	local modeloOriginal = Workspace:FindFirstChild("Axe") 
-		or Workspace:FindFirstChild("Machado")
-		or Workspace:FindFirstChild("AxeModel")
+-- Criar ferramenta genérica a partir de um modelo
+local function criarFerramenta(nome, modeloNome, toolTip, escala)
+	-- Buscar o modelo no Workspace
+	local modeloOriginal = Workspace:FindFirstChild(modeloNome)
+		or Workspace:FindFirstChild(nome)
+		or Workspace:FindFirstChild(modeloNome .. "Model")
 	
 	if not modeloOriginal then
-		print("⚠️ Modelo Axe não encontrado no Workspace!")
+		print("⚠️ Modelo " .. modeloNome .. " não encontrado no Workspace!")
 		return nil
 	end
 	
 	-- Criar uma Tool wrapper
 	local tool = Instance.new("Tool")
-	tool.Name = "Machado"
-	tool.ToolTip = "Usado para cortar madeira"
+	tool.Name = nome
+	tool.ToolTip = toolTip
 	
 	-- Clonar o modelo
-	local machado = modeloOriginal:Clone()
-	machado.Name = "MachadoModel"
+	local modelo = modeloOriginal:Clone()
+	modelo.Name = nome .. "Model"
 	
-	-- Escala de redução (50% do tamanho original)
-	local escala = 0.5
+	-- Escala padrão 50% se não especificado
+	local escala = escala or 0.5
 	
 	-- Coletar todas as partes base
 	local partes = {}
-	for _, parte in pairs(machado:GetDescendants()) do
+	for _, parte in pairs(modelo:GetDescendants()) do
 		if parte:IsA("BasePart") then
 			table.insert(partes, parte)
 		end
 	end
 	
 	-- Pegar a posição original do modelo para calcular offsets
-	local modeloCFrame = machado:GetPivot()
+	local modeloCFrame = modelo:GetPivot()
 	
 	-- Redimensionar e reposicionar todas as partes
 	for _, parte in pairs(partes) do
@@ -141,33 +141,64 @@ local function criarMachado()
 	end
 	
 	-- Destruir o modelo vazio
-	machado:Destroy()
+	modelo:Destroy()
 	
-	-- Adicionar script de ataque (não mexe na estrutura do machado)
+	-- Adicionar script de ataque
 	local ReplicatedStorage = game:GetService("ReplicatedStorage")
-	local scriptTemplate = ReplicatedStorage:FindFirstChild("MachadoAtaqueTemplate")
+	local scriptTemplate = nil
+	
+	if nome == "Machado" then
+		scriptTemplate = ReplicatedStorage:FindFirstChild("MachadoAtaqueTemplate")
+	elseif nome == "Picareta" then
+		scriptTemplate = ReplicatedStorage:FindFirstChild("PicaretaAtaqueTemplate")
+	end
+	
 	if scriptTemplate then
 		local scriptAtaque = scriptTemplate:Clone()
-		scriptAtaque.Name = "MachadoAtaque"
+		scriptAtaque.Name = nome .. "Ataque"
 		scriptAtaque.Parent = tool
-		print("📝 Script de ataque adicionado ao machado")
+		print("📝 Script de ataque adicionado ao " .. nome)
 	else
-		print("⚠️ Template MachadoAtaque não encontrado")
+		print("⚠️ Template de ataque não encontrado para " .. nome)
 	end
 	
 	return tool
 end
+
+-- Função wrapper para criar Machado
+local function criarMachado()
+	return criarFerramenta("Machado", "Axe", "Usado para cortar madeira", 0.5)
+end
+
+-- Função wrapper para criar Picareta
+local function criarPicareta()
+	return criarFerramenta("Picareta", "Pickaxe", "Usada para minerar pedra", 0.5)
+end
+
+-- Configuração de receitas
+local RECEITAS = {
+	Machado = {
+		custo = { recurso = "paus", quantidade = 1 },
+		criar = criarMachado
+	},
+	Picareta = {
+		custo = { recurso = "paus", quantidade = 2 },
+		criar = criarPicareta
+	}
+}
 
 -- Função para verificar se jogador tem recursos
 local function temRecursos(player, item)
 	local dados = dadosJogadores[player.UserId]
 	if not dados then return false end
 	
-	if item == "Machado" then
-		return dados.inventario.paus >= 1
-	end
+	local receita = RECEITAS[item]
+	if not receita then return false end
 	
-	return false
+	local recurso = receita.custo.recurso
+	local quantidade = receita.custo.quantidade
+	
+	return dados.inventario[recurso] >= quantidade
 end
 
 -- Função para gastar recursos
@@ -175,17 +206,21 @@ local function gastarRecursos(player, item)
 	local dados = dadosJogadores[player.UserId]
 	if not dados then return false end
 	
-	if item == "Machado" then
-		if dados.inventario.paus >= 1 then
-			dados.inventario.paus = dados.inventario.paus - 1
-			
-			-- Atualizar GUI do cliente
-			if atualizarInventario then
-				atualizarInventario:FireClient(player, dados.inventario)
-			end
-			
-			return true
+	local receita = RECEITAS[item]
+	if not receita then return false end
+	
+	local recurso = receita.custo.recurso
+	local quantidade = receita.custo.quantidade
+	
+	if dados.inventario[recurso] >= quantidade then
+		dados.inventario[recurso] = dados.inventario[recurso] - quantidade
+		
+		-- Atualizar GUI do cliente
+		if atualizarInventario then
+			atualizarInventario:FireClient(player, dados.inventario)
 		end
+		
+		return true
 	end
 	
 	return false
@@ -207,11 +242,12 @@ local function processarCraft(player, item)
 	end
 	
 	-- Criar e dar o item ao jogador
-	if item == "Machado" then
-		local machado = criarMachado()
-		if machado then
-			machado.Parent = player.Backpack
-			print("✅ " .. player.Name .. " craftou um Machado! (-1 Pau)")
+	local receita = RECEITAS[item]
+	if receita then
+		local ferramenta = receita.criar()
+		if ferramenta then
+			ferramenta.Parent = player.Backpack
+			print("✅ " .. player.Name .. " craftou um " .. item .. "! (-" .. receita.custo.quantidade .. " " .. receita.custo.recurso .. ")")
 		end
 	end
 end
@@ -223,4 +259,5 @@ end)
 
 print("✅ Servidor de Crafting inicializado!")
 print("   📋 Receitas disponíveis:")
-print("      🔨 Machado = 1 Pau")
+print("      🪓 Machado = 1 Pau")
+print("      ⛏️ Picareta = 2 Paus")
