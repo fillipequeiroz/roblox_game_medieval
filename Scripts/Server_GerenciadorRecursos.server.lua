@@ -56,7 +56,7 @@ local function inicializarJogador(player)
 		inventario = {
 			madeira = 0,
 			pedra = 0,
-			paus = 0
+			gravetos = 0
 		},
 		ferramentaEquipada = nil
 	}

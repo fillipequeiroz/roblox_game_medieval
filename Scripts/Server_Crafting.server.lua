@@ -178,11 +178,11 @@ end
 -- Configuração de receitas
 local RECEITAS = {
 	Machado = {
-		custo = { recurso = "paus", quantidade = 1 },
+		custo = { recurso = "gravetos", quantidade = 1 },
 		criar = criarMachado
 	},
 	Picareta = {
-		custo = { recurso = "paus", quantidade = 2 },
+		custo = { recurso = "gravetos", quantidade = 2 },
 		criar = criarPicareta
 	}
 }

@@ -58,7 +58,7 @@ local textoPaus = Instance.new("TextLabel")
 textoPaus.Size = UDim2.new(1, -20, 0, 25)
 textoPaus.Position = UDim2.new(0, 10, 0, 40)
 textoPaus.BackgroundTransparency = 1
-textoPaus.Text = "🌿 Paus: 0"
+textoPaus.Text = "🌿 Gravetos: 0"
 textoPaus.TextColor3 = Color3.fromRGB(100, 200, 100)
 textoPaus.TextSize = 16
 textoPaus.Font = Enum.Font.Gotham
@@ -124,7 +124,7 @@ end)
 
 -- Atualizar inventário
 atualizarInventario.OnClientEvent:Connect(function(inventario)
-	textoPaus.Text = "🌿 Paus: " .. (inventario.paus or 0)
+	textoPaus.Text = "🌿 Gravetos: " .. (inventario.paus or 0)
 	textoMadeira.Text = "🪵 Madeira: " .. (inventario.madeira or 0)
 	textoPedra.Text = "🪨 Pedra: " .. (inventario.pedra or 0)
 end)

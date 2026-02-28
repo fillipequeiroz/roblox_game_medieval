@@ -39,14 +39,14 @@ local FERRAMENTAS = {
 		nome = "Machado",
 		descricao = "Usado para cortar madeira",
 		icone = "🪓",
-		custo = { recurso = "paus", quantidade = 1, nomeExibicao = "Pau" },
+		custo = { recurso = "gravetos", quantidade = 1, nomeExibicao = "Pau" },
 		corFundo = Color3.fromRGB(139, 69, 19) -- Marrom para madeira
 	},
 	{
 		nome = "Picareta",
 		descricao = "Usada para minerar pedra",
 		icone = "⛏️",
-		custo = { recurso = "paus", quantidade = 2, nomeExibicao = "Paus" },
+		custo = { recurso = "gravetos", quantidade = 2, nomeExibicao = "Paus" },
 		corFundo = Color3.fromRGB(70, 70, 70) -- Cinza escuro para pedra
 	}
 }

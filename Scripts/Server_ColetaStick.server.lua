@@ -39,14 +39,14 @@ local function inicializarJogador(player)
 	if not dadosJogadores[player.UserId] then
 		dadosJogadores[player.UserId] = {
 			inventario = {
-				paus = 0,
+				gravetos = 0,
 				madeira = 0,
 				pedra = 0
 			}
 		}
 	else
-		-- Garante que o campo 'paus' exista
-		dadosJogadores[player.UserId].inventario.paus = dadosJogadores[player.UserId].inventario.paus or 0
+		-- Garante que o campo 'gravetos' exista
+		dadosJogadores[player.UserId].inventario.gravetos = dadosJogadores[player.UserId].inventario.gravetos or 0
 	end
 end
 
@@ -110,9 +110,9 @@ local function processarColeta(player, item)
 	
 	-- Processar baseado no tipo
 	if tipoRecurso == "Stick" or tipoRecurso == "Pau" then
-		dados.inventario.paus = dados.inventario.paus + 1
+		dados.inventario.gravetos = dados.inventario.gravetos + 1
 		atualizarInventario:FireClient(player, dados.inventario)
-		print("🌿 " .. player.Name .. " coletou 1 Pau (Total: " .. dados.inventario.paus .. ")")
+		print("🌿 " .. player.Name .. " coletou 1 Pau (Total: " .. dados.inventario.gravetos .. ")")
 		
 		-- Respawn
 		task.spawn(function()

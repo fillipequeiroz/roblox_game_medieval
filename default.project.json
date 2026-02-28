@@ -39,6 +39,13 @@
         "CortarArvore": {
           "$path": "Scripts/Cliente_CortarArvore.client.lua"
         }
+      },
+      "MenuConstrucaoGUI": {
+        "$className": "ScreenGui",
+        "$ignoreUnknownInstances": true,
+        "MenuConstrucao": {
+          "$path": "Scripts/Menu_Construcao.client.lua"
+        }
       }
     },
     "StarterPack": {
@@ -81,6 +88,9 @@
       },
       "ServerCortarArvore": {
         "$path": "Scripts/Server_CortarArvore.server.lua"
+      },
+      "ServerConstrucaoItens": {
+        "$path": "Scripts/Server_ConstrucaoItens.server.lua"
       }
     }
   }
