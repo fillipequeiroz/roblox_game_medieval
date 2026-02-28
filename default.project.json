@@ -91,6 +91,9 @@
       },
       "ServerConstrucaoItens": {
         "$path": "Scripts/Server_ConstrucaoItens.server.lua"
+      },
+      "ServerBaseInicial": {
+        "$path": "Scripts/Server_BaseInicial.server.lua"
       }
     }
   }
