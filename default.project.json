@@ -32,6 +32,13 @@
         "WorkbenchCrafting": {
           "$path": "Scripts/Workbench_Crafting.client.lua"
         }
+      },
+      "CorteArvoreGUI": {
+        "$className": "ScreenGui",
+        "$ignoreUnknownInstances": true,
+        "CortarArvore": {
+          "$path": "Scripts/Cliente_CortarArvore.client.lua"
+        }
       }
     },
     "StarterPack": {
@@ -60,6 +67,9 @@
       "ServerSpawnRecursos": {
         "$path": "Scripts/Server_SpawnRecursos.server.lua"
       },
+      "ServerConfiguracaoTestes": {
+        "$path": "Scripts/Server_ConfiguracaoTestes.server.lua"
+      },
       "ServerConstrucao": {
         "$path": "Scripts/Server_Construcao.server.lua"
       },
@@ -68,6 +78,9 @@
       },
       "ServerCrafting": {
         "$path": "Scripts/Server_Crafting.server.lua"
+      },
+      "ServerCortarArvore": {
+        "$path": "Scripts/Server_CortarArvore.server.lua"
       }
     }
   }
