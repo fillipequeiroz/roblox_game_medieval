@@ -318,8 +318,23 @@ local totalArvores = 0
 local totalGalhos = 0
 local totalPedras = 0
 
+-- Configuração da Zona Segura (centro do mapa sem árvores)
+local ZONA_SEGURA_CENTRO = Vector3.new(53.63, 0, -48.23) -- Centro da grama
+local ZONA_SEGURA_RAIO = 80 -- Raio da área limpa (80 studs)
+
+-- Verificar se posição está na zona segura
+local function estaNaZonaSegura(posicao)
+	local distancia = (Vector3.new(posicao.X, 0, posicao.Z) - Vector3.new(ZONA_SEGURA_CENTRO.X, 0, ZONA_SEGURA_CENTRO.Z)).Magnitude
+	return distancia < ZONA_SEGURA_RAIO
+end
+
 -- Spawnar árvore
 local function spawnarArvore(tipo, posicao, rotacao, nomeSpawn)
+	-- Verificar se está na zona segura do centro
+	if estaNaZonaSegura(posicao) then
+		return false -- Não spawna árvore na zona segura
+	end
+	
 	-- Buscar no ServerStorage primeiro, depois no Workspace (fallback)
 	local modeloOriginal = ServerStorage:FindFirstChild(tipo)
 	if not modeloOriginal then
@@ -386,6 +401,11 @@ end
 
 -- Spawnar galho
 local function spawnarGalho(posicao, rotacao, nomeSpawn)
+	-- Verificar se está na zona segura do centro
+	if estaNaZonaSegura(posicao) then
+		return false -- Não spawna galho na zona segura
+	end
+	
 	-- Buscar no ServerStorage primeiro
 	local modeloOriginal = ServerStorage:FindFirstChild("smallStick") or ServerStorage:FindFirstChild("StickRecurso")
 	if not modeloOriginal then
@@ -416,6 +436,11 @@ end
 
 -- Spawnar pedra
 local function spawnarPedra(posicao, escala, rotacao, nomeSpawn)
+	-- Verificar se está na zona segura do centro
+	if estaNaZonaSegura(posicao) then
+		return false -- Não spawna pedra na zona segura
+	end
+	
 	-- Buscar no ServerStorage primeiro
 	local modeloOriginal = ServerStorage:FindFirstChild("smallRockStone")
 	if not modeloOriginal then
@@ -516,6 +541,7 @@ end
 
 print("🌍 Iniciando sistema de spawn...")
 print("   📍 Grama em: " .. tostring(GRAMA_POS))
+print("   🏰 Zona segura no centro: raio " .. ZONA_SEGURA_RAIO .. " studs (sem árvores/pedras/galhos)")
 
 if mapaJaFoiGerado() then
 	print("✅ Mapa já foi gerado anteriormente. Pulando geração.")
