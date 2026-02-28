@@ -25,6 +25,38 @@ local dadosJogadores = _G.DadosJogadores
 
 local golpesArvores = {}
 
+-- Configuração de tiers de árvores
+local CONFIG_ARVORES = {
+	Tree1 = { golpesNecessarios = 5, madeira = 1 },
+	Tree2 = { golpesNecessarios = 5, madeira = 1 },
+	Tree3 = { golpesNecessarios = 10, madeira = 3 },
+	Tree4 = { golpesNecessarios = 10, madeira = 3 },
+	Tree5 = { golpesNecessarios = 8, madeira = 2 },
+}
+
+-- Função para obter configuração da árvore
+local function getConfigArvore(nomeArvore)
+	-- Verificar se é TreeSpawn_X (árvores spawnadas) - extrair o número
+	local spawnNum = nomeArvore:match("TreeSpawn_(%d+)")
+	if spawnNum then
+		-- Mapear TreeSpawn_X para TreeX
+		local treeName = "Tree" .. spawnNum
+		if CONFIG_ARVORES[treeName] then
+			return CONFIG_ARVORES[treeName]
+		end
+	end
+	
+	-- Verificar se o nome começa com Tree1, Tree2, etc (árvores originais)
+	for treeName, config in pairs(CONFIG_ARVORES) do
+		if nomeArvore:find(treeName) then
+			return config
+		end
+	end
+	
+	-- Configuração padrão
+	return { golpesNecessarios = 5, madeira = 1 }
+end
+
 -- Encontrar árvore pelo nome no Workspace
 local function encontrarArvorePorNome(nomeArvore)
 	for _, objeto in pairs(Workspace:GetDescendants()) do
@@ -129,6 +161,11 @@ local function processarGolpe(player, nomeArvore)
 	-- ID único
 	local arvoreId = nomeArvore
 	
+	-- Obter configuração da árvore
+	local config = getConfigArvore(nomeArvore)
+	local golpesNecessarios = config.golpesNecessarios
+	local madeiraReward = config.madeira
+	
 	-- Inicializar contador
 	if not golpesArvores[arvoreId] then
 		golpesArvores[arvoreId] = 0
@@ -138,10 +175,10 @@ local function processarGolpe(player, nomeArvore)
 	golpesArvores[arvoreId] = golpesArvores[arvoreId] + 1
 	local golpesAtuais = golpesArvores[arvoreId]
 	
-	print("🪓 " .. player.Name .. " golpeou '" .. nomeArvore .. "' (" .. golpesAtuais .. "/1)")
+	print("🪓 " .. player.Name .. " golpeou '" .. nomeArvore .. "' (" .. golpesAtuais .. "/" .. golpesNecessarios .. ")")
 	
-	-- Se chegou a 1 golpe
-	if golpesAtuais >= 1 then
+	-- Se chegou aos golpes necessários
+	if golpesAtuais >= golpesNecessarios then
 		local posicao = arvore:GetPivot().Position
 		
 		-- Destruir árvore
@@ -171,6 +208,7 @@ local function processarGolpe(player, nomeArvore)
 			novoTronco:PivotTo(CFrame.new(posicao))
 			novoTronco.Parent = Workspace
 			novoTronco:SetAttribute("TipoRecurso", "Tronco")
+			novoTronco:SetAttribute("Madeira", madeiraReward)  -- Guardar quantidade de madeira no tronco
 			
 			-- Configurar TODAS as partes do modelo
 			for _, parte in pairs(novoTronco:GetDescendants()) do
@@ -242,6 +280,9 @@ local function processarColetaTronco(player, nomeTronco)
 		return
 	end
 	
+	-- Obter quantidade de madeira do tronco (ou usar 1 como padrão)
+	local madeira = tronco:GetAttribute("Madeira") or 1
+	
 	-- Destruir tronco
 	tronco:Destroy()
 	print("🪵 Tronco coletado!")
@@ -249,11 +290,11 @@ local function processarColetaTronco(player, nomeTronco)
 	-- Adicionar madeira ao inventário
 	local dados = dadosJogadores[player.UserId]
 	if dados then
-		dados.inventario.madeira = dados.inventario.madeira + 2
+		dados.inventario.madeira = dados.inventario.madeira + madeira
 		if atualizarInventario then
 			atualizarInventario:FireClient(player, dados.inventario)
 		end
-		print("🪵 " .. player.Name .. " ganhou 2 madeiras!")
+		print("🪵 " .. player.Name .. " ganhou " .. madeira .. " madeira(s)!")
 	end
 end
 

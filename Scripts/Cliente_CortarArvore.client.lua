@@ -59,6 +59,37 @@ local podeGolpear = true
 local podeColetar = true
 local temMachado = false
 
+-- Configuração de tiers de árvores (deve bater com o servidor)
+local CONFIG_ARVORES = {
+	Tree1 = { golpesNecessarios = 5 },
+	Tree2 = { golpesNecessarios = 5 },
+	Tree3 = { golpesNecessarios = 10 },
+	Tree4 = { golpesNecessarios = 10 },
+	Tree5 = { golpesNecessarios = 8 },
+}
+
+-- Função para obter configuração da árvore
+local function getConfigArvore(nomeArvore)
+	-- Verificar se é TreeSpawn_X (árvores spawnadas) - extrair o número
+	local spawnNum = nomeArvore:match("TreeSpawn_(%d+)")
+	if spawnNum then
+		-- Mapear TreeSpawn_X para TreeX
+		local treeName = "Tree" .. spawnNum
+		if CONFIG_ARVORES[treeName] then
+			return CONFIG_ARVORES[treeName]
+		end
+	end
+	
+	-- Verificar se o nome começa com Tree1, Tree2, etc (árvores originais)
+	for treeName, config in pairs(CONFIG_ARVORES) do
+		if nomeArvore:find(treeName) then
+			return config
+		end
+	end
+	
+	return { golpesNecessarios = 5 }
+end
+
 -- Animação de ataque do machado (mesma do MachadoAtaque.client.lua)
 local animacaoAtaque = Instance.new("Animation")
 animacaoAtaque.AnimationId = "rbxassetid://522635514"  -- Tool slash
@@ -199,7 +230,9 @@ RunService.RenderStepped:Connect(function()
 			if tipoObjeto == "tronco" then
 				avisoTexto.Text = "🪵 Pressione [E] para coletar\n🌲 Tronco"
 			else
-				avisoTexto.Text = "🪓 Pressione [E] para cortar\n🌲 Árvore (" .. golpesAtuais .. "/1)"
+				local config = getConfigArvore(objetoProximo.Name)
+				local golpesNecessarios = config.golpesNecessarios
+				avisoTexto.Text = "🪓 Pressione [E] para cortar\n🌲 Árvore (" .. golpesAtuais .. "/" .. golpesNecessarios .. ")"
 			end
 		else
 			-- Tem árvore mas não tem machado
@@ -237,7 +270,9 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 			
 			-- Feedback visual
 			golpesAtuais = golpesAtuais + 1
-			avisoTexto.Text = "🪓 Cortando... (" .. golpesAtuais .. "/1)"
+			local config = getConfigArvore(objetoProximo.Name)
+			local golpesNecessarios = config.golpesNecessarios
+			avisoTexto.Text = "🪓 Cortando... (" .. golpesAtuais .. "/" .. golpesNecessarios .. ")"
 			
 			task.wait(TEMPO_ENTRE_GOLPES)
 			podeGolpear = true
