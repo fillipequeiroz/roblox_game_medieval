@@ -51,6 +51,9 @@
       "ServerColeta": {
         "$path": "Scripts/Server_ColetaStick.server.lua"
       },
+      "ServerConfigurarPedras": {
+        "$path": "Scripts/Server_ConfigurarPedras.server.lua"
+      },
       "ServerConstrucao": {
         "$path": "Scripts/Server_Construcao.server.lua"
       },

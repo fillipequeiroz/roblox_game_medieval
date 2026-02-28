@@ -58,6 +58,15 @@ local function respawnarItem(template, posicao)
 	
 	local novoItem = template:Clone()
 	novoItem:SetAttribute("TipoRecurso", template:GetAttribute("TipoRecurso"))
+	
+	-- Diminuir o tamanho (escala 0.5 = metade do tamanho)
+	local escala = 0.5
+	for _, parte in pairs(novoItem:GetDescendants()) do
+		if parte:IsA("BasePart") then
+			parte.Size = parte.Size * escala
+		end
+	end
+	
 	novoItem:PivotTo(CFrame.new(posicao))
 	novoItem.Parent = workspace
 	
