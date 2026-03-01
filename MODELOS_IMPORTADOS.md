@@ -39,7 +39,9 @@
 | Nome Exato | Uso |
 |------------|-----|
 | `Iron Ore` | Minério de Ferro (coleta na mina) |
+| `Iron bar` | Lingote de Ferro processado |
 | `Coal` | Carvão (combustível) |
+| `Mine` | Entrada da Mina (estrutura no mapa) |
 
 ---
 
@@ -157,10 +159,11 @@ Madeira_Processada = "Tabua madeira"
 Pedra_Bruta = "smallRockStone" (existente)
 Bloco_Pedra = "Stone block"
 Minério_Ferro = "Iron Ore"
-Ferro_Processado = (falta - criar ou usar "Iron Ore" como placeholder)
+Ferro_Processado = "Iron bar"
 Fibra = "TallGrass"
 Cordas = "rope"
 Carvao = "Coal"
+Entrada_Mina = "Mine"
 ```
 
 ### Defesas:
@@ -188,9 +191,6 @@ Zumbi_Avancado = "Zumbi Avancado"
   - Torre de madeira
   - Torre de flechas
   - Torre de balista
-  
-- [ ] **Ferro processado** (lingote)
-  - Criar a partir de "Iron Ore" ou modelar
 
 - [ ] **Aço** (lingote)
   - Criar modelo ou reutilizar ferro com cor diferente
@@ -200,9 +200,6 @@ Zumbi_Avancado = "Zumbi Avancado"
 
 - [ ] **Mina Terrestre**
   - Barril ou caixa com pólvora
-
-- [ ] **Entrada da Mina**
-  - Cabana na montanha
 
 ---
 
